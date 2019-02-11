@@ -9,11 +9,8 @@ import os
 from functools import reduce
 import csv
 
-GMAIL_UNAME = 'arun.nettam@gmail.com'
-GMAIL_PASSWD = '07091994raju'
-
-#GMAIL_UNAME = 'atombytehq'
-#GMAIL_PASSWD = 'axiasyilzoffewgg'
+GMAIL_UNAME = ''
+GMAIL_PASSWD = ''
 
 cust_data = []
 ind_data = []
@@ -68,14 +65,6 @@ def analyz_func(analyz, html1, data):
             return html1.format(analyz['total'], analyz['on'], analyz['off'], analyz['onp'])
     else:
         return html1.format(analyz['total'])
-
-#url_info = {'ch':[{
-#    'channel': '577293',
-#    'key': 'NK42UH2IZJ3SD4JD'},
-#    {'channel': '',
-#    'key': ''}],
-#    'base': 'https://api.thingspeak.com/channels/',
-#}
 
 tm1 = 0
 av_s = 0
@@ -389,91 +378,6 @@ def chart(sdate, shift, fnm, url_info, data, field_cnt):
     #print off_time_markup
 
 
-def mymail(d, field_cnt, data):
-    mail = sender.Mail(host='smtp.gmail.com', port=465, username=GMAIL_UNAME,
-        password=GMAIL_PASSWD, use_ssl = True, debug_level=0)
-    att = []
-    try:
-        html3 = """ """
-        for i in range(1, field_cnt + 1):
-            try:
-                with open('a%s.png' % (LABELS[i]), 'rb') as f:
-                    att.append(sender.Attachment('%s_shift_1' % LABELS[i], 'image/png', f.read()))
-                os.remove('a%s.png' % (LABELS[i]))
-            except:
-                pass
-
-            try:
-                with open('a-%s.png'%(LABELS[i]), 'rb') as f:
-                    att.append(sender.Attachment('a-%s.png'%LABELS[i], 'image/png', f.read()))
-                os.remove('a-%s.png'%(LABELS[i]))
-            except:
-                pass
-
-            try:
-                with open('b%s.png'%(LABELS[i]), 'rb') as f:
-                    att.append(sender.Attachment('%s_shift_2'%LABELS[i], 'image/png', f.read()))
-                os.remove('b%s.png'%(LABELS[i]))
-            except:
-                pass
-
-            try:
-                with open('b-%s.png'%(LABELS[i]), 'rb') as f:
-                    att.append(sender.Attachment('hist_%s_shift_2'%LABELS[i], 'image/png', f.read()))
-                os.remove('b-%s.png'%(LABELS[i]))
-            except:
-                pass
-            print('x0')
-            if i != field_cnt or i == 1:
-                print('x1')
-                try:
-                    if data['Off_Time_flag'] == 'Y':
-                        print('x2')
-                        html3 += """<table style="float: left;"><caption>Morning Shift, %s</caption>"""%LABELS[i]
-                        html3 += """<tr><th>Duration</th><th>Frequency</th><th>Total Time</th></tr>%s</table>"""%off_time_markup[i][1]
-                        html3 += """<table><caption>Night Shift, %s</caption>"""%LABELS[i]
-                        html3 += """<tr><th>Duration</th><th>Frequency</th><th>Total Time</th></tr>%s</table>"""%off_time_markup[i][2]
-
-                except:
-                    pass
-
-        html2 = """
-            <html>
-                <head>
-                <style>
-                        h2 { color: #008080; text-decoration: underline; }
-                        table caption { background-color:orange; padding-top:5px; padding-bottom:5px; font-size: 16px;
-                                        color:white; font-weight: bold; border-right: 2px solid white;
-                                        border-left: 2px solid white }
-
-                        table th {
-                        padding-top: 10px;
-                        padding-bottom: 10px;
-                        text-align: left;
-                        background-color: #008080;
-                        color: white; }
-                        table tr, td { border-collapse: collapse; padding-top: 10px; text-align: left;
-                        padding-bottom: 10px; background-color: #ddd;font-size: 14px;
-                        background-color: #f2f2f2; font-weight: bold; }
-                        table th, td { padding: 10px; text-align: left; border: 12px ridge(1,10,1); }
-                        table td { font-family: "Trebuchet MS"; font-size:12px; color: #008080;
-                        padding-top: 10px; padding-bottom: 10px;}
-                        #f_st { font-weight: bold; color:  #8B4513; }
-                </style>
-                </head>
-                <body>
-                %s"""%(bdy)
-        if html3 != """ """:
-            html2 += """<h2>Off Time Analysis:</h2>%s</body></html>"""%(html3)
-        mail.send_message('Report for %s %s'%(data['Customer_Name'], d.strftime('%d %b, %y')), fromaddr='%s@gmail.com'%GMAIL_UNAME, \
-            to=data['To_List_Email'],
-            bcc = data['BCC_List_Email'],
-            html=html2,
-            attachments = att)
-
-    except Exception as e:
-        print (e)
-
 if __name__ == '__main__':
     read_customer_data()
     for data in ind_data:
@@ -491,5 +395,3 @@ if __name__ == '__main__':
         chart(datetime.datetime.now()-datetime.timedelta(days = 1), 2, 'b', url_info, data, field_cnt)
         print('chart_2:', html1)
         print ('sending mail')
-        mymail(datetime.datetime.now()-datetime.timedelta(days = 1), field_cnt, data)
-        print('mail_sent')
